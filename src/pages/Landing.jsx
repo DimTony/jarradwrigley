@@ -41,8 +41,7 @@ const Landing = () => {
   const toast = useToast();
 
   const areFieldsFilled = () => {
-    const { clientEmail, ...otherFields } = data;
-    return Object.values(otherFields).every((field) => field.trim() !== "");
+    return Object.values(data).every((field) => field.trim() !== "");
   };
 
   const handleChange = (e) => {
