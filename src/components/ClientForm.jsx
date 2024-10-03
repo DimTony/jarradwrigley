@@ -182,11 +182,12 @@ const ClientForm = ({ handleSubmit, handleChange, data, areFieldsFilled }) => {
             <MobileForm handleChange={handleChange} data={data} />
             <HStack w="100%" justifyContent="center">
               <Button
-                bg={!areFieldsFilled() ? "#9999ff" : "blue"}
+                bg={!areFieldsFilled() ? "#d3d3d3" : "blue"}
                 _hover={{ bg: "#bfe4ff", color: "blue" }}
-                color="#fff"
+                color={!areFieldsFilled() ? "#888" : "#fff"}
                 w="30%"
                 type="submit"
+                cursor={!areFieldsFilled() ? "not-allowed" : "pointer"}
                 // isDisabled={!areFieldsFilled()}
               >
                 Submit
