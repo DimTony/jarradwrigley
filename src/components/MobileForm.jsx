@@ -74,7 +74,6 @@ const MobileForm = ({ handleChange, data }) => {
             name="clientEmail"
             value={data.clientEmail}
             onChange={handleChange}
-            placeholder="(optional)"
           />
         </FormControl>
 

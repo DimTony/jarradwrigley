@@ -93,7 +93,6 @@ const ClientForm = ({ handleSubmit, handleChange, data, areFieldsFilled }) => {
                     name="clientEmail"
                     value={data.clientEmail}
                     onChange={handleChange}
-                    placeholder="(optional)"
                   />
                 </FormControl>
 
