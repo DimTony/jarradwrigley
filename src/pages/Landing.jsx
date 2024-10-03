@@ -143,7 +143,7 @@ const Landing = () => {
           />
         </>
       );
-      break; // Added break
+      break;
 
     case "done":
       content = (
@@ -151,7 +151,7 @@ const Landing = () => {
           <SuccessPage />
         </>
       );
-      break; // Added break
+      break;
 
     default:
       content = (
@@ -162,7 +162,7 @@ const Landing = () => {
           areFieldsFilled={areFieldsFilled}
         />
       );
-      break; // Added break
+      break;
   }
 
   return (
