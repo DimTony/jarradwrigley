@@ -3,12 +3,16 @@ import { Box, Spinner, VStack, Text } from "@chakra-ui/react";
 import Navbar from "../components/Navbar";
 import ContractForm from "../other/ContractForm";
 import PaymentForm from "../other/PaymentForm";
+import axios from "axios";
+import { BaseUrl } from "../constants";
 
 const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentBottom, setCurrentBottom] = useState("form");
   const [pdfData, setPdfData] = useState(null);
   const [pictureData, setPictureData] = useState(null);
+  const [step, setStep] = useState(1);
+  const [isPaymentFormLoading, setIsPaymentFormLoading] = useState(false);
 
   const handlePdfUpload = (data) => {
     setPdfData(data); // Store the uploaded PDF data
@@ -26,12 +30,21 @@ const AdminDashboard = () => {
 
     try {
       setIsLoading(true);
-      const response = await fetch("YOUR_BACKEND_API_ENDPOINT", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await response.json();
-      console.log("Files uploaded successfully:", result);
+
+      // Send the formData directly as the request body
+      const response = await axios.post(
+        `${BaseUrl}/jarrad-wrigley/confirmation/save`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Important for sending files
+          },
+        }
+      );
+
+      // Log the response
+      console.log("Files uploaded successfully:", response.data);
+
       setCurrentBottom("done");
     } catch (error) {
       console.error("Error uploading files:", error);
@@ -60,6 +73,10 @@ const AdminDashboard = () => {
           setCurrentBottom={setCurrentBottom}
           pictureData={pictureData}
           setPictureData={setPictureData}
+          step={step}
+          setStep={setStep}
+          isPaymentFormLoading={isPaymentFormLoading}
+          setIsPaymentFormLoading={setIsPaymentFormLoading}
         />
       );
       break;

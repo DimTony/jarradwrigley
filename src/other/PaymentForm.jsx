@@ -1,9 +1,9 @@
-import { useState } from "react";
-// PaymentForm.js
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
+  FormControl,
+  FormLabel,
   HStack,
   Icon,
   Image,
@@ -26,9 +26,70 @@ const PaymentForm = ({
   setCurrentBottom,
   pictureData,
   setPictureData,
+  step,
+  setStep,
+  isPaymentFormLoading,
+  setIsPaymentFormLoading,
 }) => {
   const [isGenerating, setIsGenerating] = useState(true);
-  const [step, setStep] = useState(1);
+  const [selectedReceiptFile, setSelectedReceiptFile] = useState(null);
+  const receiptPhotoFileInputRef = useRef(null);
+  const toast = useToast();
+
+  const handleReceiptPhotoFileChange = (event) => {
+    const file = event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Check if the file is an image
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a valid image file.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setSelectedReceiptFile(null);
+      setPictureData(null);
+
+      return;
+    }
+
+    // Check file size (limit to 5MB for this example)
+    const maxSize = 2000 * 1024 * 1024; // 2GB in bytes
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Please select an image file smaller than 5MB.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setSelectedReceiptFile(null);
+      setPictureData(null);
+
+      return;
+    }
+
+    // File is valid, update state and formData
+    setSelectedReceiptFile(file);
+    setPictureData(file);
+
+    toast({
+      title: "File selected",
+      description: `${file.name} has been selected.`,
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  const handleReceiptPhotoButtonClick = () => {
+    receiptPhotoFileInputRef.current.click();
+  };
 
   useEffect(() => {
     setIsGenerating(true);
@@ -53,6 +114,17 @@ const PaymentForm = ({
     }
   };
 
+  const handlePaid = (e) => {
+    e.preventDefault();
+
+    setIsPaymentFormLoading(true);
+
+    setTimeout(() => {
+      setStep(2);
+      setIsPaymentFormLoading(false);
+    }, 5000);
+  };
+
   if (isGenerating) {
     return (
       <VStack mb="2rem" justifyContent="center" pt="5rem" w="100%">
@@ -72,7 +144,7 @@ const PaymentForm = ({
 
   return (
     <VStack spacing={4} w="100%">
-      <VStack pt="2rem">
+      <VStack pt="1rem">
         <Text
           fontSize={{ xl: "2rem", base: "1rem" }}
           color="#306ac0"
@@ -309,7 +381,78 @@ const PaymentForm = ({
           </VStack>
         )}
 
-        {!isGenerating && step === 2 && <Text>step 2</Text>}
+        {isPaymentFormLoading && (
+          <Box
+            position="absolute"
+            top="0"
+            left="0"
+            right="0"
+            bottom="0"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            bg="rgba(255, 255, 255, 0.8)"
+            zIndex="10"
+          >
+            <Spinner size="xl" />
+          </Box>
+        )}
+
+        {!isGenerating && step === 2 && (
+          <VStack w="20rem">
+            <Box
+              w="100%"
+              h="100%"
+              bg="white"
+              borderRadius="1rem"
+              py="1rem"
+              border="0.5px solid rgba(48, 106, 192, 0.3)"
+            >
+              <VStack w="100%">
+                <VStack spacing={0}>
+                  <Image src={PayPalLogo} alt="pp" w="5rem" h="auto" />
+                  <Text fontSize="1.5rem">Upload Receipt</Text>
+                </VStack>
+                <FormControl isRequired>
+                  <FormLabel fontSize="0.75rem" textAlign="center">
+                    Upload a clear photo of the payment receipt (screenshots are
+                    allowed)
+                  </FormLabel>
+                  <HStack justifyContent="center" px="0.5rem">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleReceiptPhotoFileChange}
+                      ref={receiptPhotoFileInputRef}
+                      display="none"
+                    />
+                    <Button
+                      onClick={handleReceiptPhotoButtonClick}
+                      colorScheme="blue"
+                      px="1rem"
+                      w="10rem"
+                    >
+                      <Text fontSize="0.75rem"> Choose Photo</Text>
+                    </Button>
+                    <Box mt={2}>
+                      {selectedReceiptFile ? (
+                        <Text>
+                          Selected file: {selectedReceiptFile.name} (
+                          {(selectedReceiptFile.size / (1024 * 1024)).toFixed(
+                            2
+                          )}{" "}
+                          MB)
+                        </Text>
+                      ) : (
+                        <Text>No file selected</Text>
+                      )}
+                    </Box>
+                  </HStack>
+                </FormControl>
+              </VStack>
+            </Box>
+          </VStack>
+        )}
       </VStack>
 
       {/* <Input type="file" accept="image/*" onChange={onFileChange} /> */}
@@ -317,12 +460,16 @@ const PaymentForm = ({
         <Button onClick={() => setCurrentBottom("form")}>Previous</Button>
 
         {!isGenerating && step === 1 && (
-          <Button onClick={() => setStep(2)} colorScheme="blue">
+          <Button onClick={handlePaid} colorScheme="blue">
             Paid
           </Button>
         )}
         {!isGenerating && step === 2 && (
-          <Button onClick={handleSubmit} colorScheme="blue">
+          <Button
+            onClick={handleSubmit}
+            colorScheme="blue"
+            isDisabled={!selectedReceiptFile}
+          >
             Submit
           </Button>
         )}
